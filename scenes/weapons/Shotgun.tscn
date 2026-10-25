@@ -1,0 +1,107 @@
+[gd_scene load_steps=18 format=3 uid="uid://cshotgun12345"]
+
+[ext_resource type="Script" path="res://scripts/weapons/Shotgun.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/models/super_shotgun.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/ShotgunShellCasing.tscn" id="3_casing"]
+[ext_resource type="AudioStream" path="res://assets/audio/shotgun.wav" id="4_shoot"]
+[ext_resource type="AudioStream" path="res://assets/audio/hitmarker.wav" id="5_hit"]
+[ext_resource type="AudioStream" path="res://assets/audio/shotgun_open.wav" id="6_open"]
+[ext_resource type="AudioStream" path="res://assets/audio/shell_eject.wav" id="7_eject"]
+[ext_resource type="AudioStream" path="res://assets/audio/shells_insert.wav" id="8_insert"]
+[ext_resource type="AudioStream" path="res://assets/audio/shotgun_close.wav" id="9_close"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flash"]
+shading_mode = 0
+albedo_color = Color(1, 0.82, 0.22, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_flash"]
+material = SubResource("StandardMaterial3D_flash")
+size = Vector3(0.18, 0.18, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_smoke"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.75, 0.75, 0.78, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_smoke"]
+material = SubResource("StandardMaterial3D_smoke")
+size = Vector3(0.04, 0.04, 0.04)
+
+[node name="Shotgun" type="Node3D"]
+script = ExtResource("1_script")
+casing_scene = ExtResource("3_casing")
+
+[node name="Rig" type="Node3D" parent="."]
+
+[node name="Model" parent="Rig" instance=ExtResource("2_model")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+
+[node name="MuzzleLight" type="OmniLight3D" parent="Rig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -0.62)
+visible = false
+light_color = Color(1, 0.72, 0.25, 1)
+light_energy = 5.0
+omni_range = 8.0
+
+[node name="MuzzleFlash" type="MeshInstance3D" parent="Rig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -0.6)
+visible = false
+mesh = SubResource("BoxMesh_flash")
+
+[node name="BarrelSmoke" type="CPUParticles3D" parent="Rig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -0.6)
+emitting = false
+amount = 12
+lifetime = 0.4
+one_shot = true
+explosiveness = 0.8
+mesh = SubResource("BoxMesh_smoke")
+direction = Vector3(0, 0.8, -1)
+spread = 25.0
+gravity = Vector3(0, 0.6, 0)
+initial_velocity_min = 1.0
+initial_velocity_max = 2.5
+
+[node name="BreachSmoke" type="CPUParticles3D" parent="Rig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.1)
+emitting = false
+amount = 8
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.6
+mesh = SubResource("BoxMesh_smoke")
+direction = Vector3(0, 1, 0.3)
+spread = 35.0
+gravity = Vector3(0, 0.8, 0)
+initial_velocity_min = 0.5
+initial_velocity_max = 1.5
+
+[node name="ShootAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_shoot")
+volume_db = 2.5
+bus = &"Combat"
+
+[node name="HitmarkerAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_hit")
+volume_db = 0.0
+bus = &"SFX"
+
+[node name="OpenAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_open")
+volume_db = 1.0
+bus = &"Combat"
+
+[node name="EjectAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7_eject")
+volume_db = 0.5
+bus = &"Combat"
+
+[node name="InsertAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("8_insert")
+volume_db = 1.0
+bus = &"Combat"
+
+[node name="CloseAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("9_close")
+volume_db = 2.0
+bus = &"Combat"

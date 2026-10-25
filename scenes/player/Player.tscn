@@ -1,0 +1,108 @@
+[gd_scene load_steps=12 format=3 uid="uid://cplayer99988"]
+
+[ext_resource type="Script" path="res://scripts/player/Player.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/Shotgun.tscn" id="2_shotgun"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/Revolver.tscn" id="3_revolver"]
+[ext_resource type="AudioStream" path="res://assets/audio/dash.wav" id="3_dash"]
+[ext_resource type="AudioStream" path="res://assets/audio/blood_heal.wav" id="4_heal"]
+[ext_resource type="AudioStream" path="res://assets/audio/hitmarker.wav" id="5_hitmarker"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_arm"]
+albedo_color = Color(0.14, 0.15, 0.18, 1)
+metallic = 0.85
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="BoxMesh_forearm"]
+material = SubResource("StandardMaterial3D_arm")
+size = Vector3(0.12, 0.12, 0.32)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_knuckles"]
+albedo_color = Color(0.2, 0.9, 1, 1)
+emission_enabled = true
+emission = Color(0.2, 0.9, 1, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_fist"]
+material = SubResource("StandardMaterial3D_knuckles")
+size = Vector3(0.14, 0.14, 0.16)
+
+[sub_resource type="BoxMesh" id="BoxMesh_slidespark"]
+size = Vector3(0.04, 0.04, 0.04)
+
+[node name="Player" type="CharacterBody3D" groups=["player"]]
+collision_layer = 2
+collision_mask = 9
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_player")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Head"]
+fov = 95.0
+near = 0.05
+
+[node name="WeaponHolder" type="Node3D" parent="Head/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, -0.22, -0.38)
+
+[node name="Shotgun" parent="Head/Camera3D/WeaponHolder" instance=ExtResource("2_shotgun")]
+
+[node name="Revolver" parent="Head/Camera3D/WeaponHolder" instance=ExtResource("3_revolver")]
+visible = false
+
+[node name="MeleeArm" type="Node3D" parent="Head/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.28, -0.55, -0.2)
+visible = false
+
+[node name="Forearm" type="MeshInstance3D" parent="Head/Camera3D/MeleeArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.08)
+mesh = SubResource("BoxMesh_forearm")
+
+[node name="Fist" type="MeshInstance3D" parent="Head/Camera3D/MeleeArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.28)
+mesh = SubResource("BoxMesh_fist")
+
+[node name="SlideSparks" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+emitting = false
+amount = 20
+lifetime = 0.3
+mesh = SubResource("BoxMesh_slidespark")
+direction = Vector3(0, 0.5, 1)
+spread = 35.0
+gravity = Vector3(0, -12, 0)
+initial_velocity_min = 4.0
+initial_velocity_max = 7.0
+
+[node name="DashAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_dash")
+volume_db = -3.0
+bus = &"SFX"
+
+[node name="HealAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_heal")
+volume_db = 0.0
+bus = &"SFX"
+
+[node name="HurtAudio" type="AudioStreamPlayer" parent="."]
+volume_db = 0.0
+bus = &"SFX"
+
+[node name="PunchWhiffAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_dash")
+pitch_scale = 1.8
+volume_db = -2.0
+bus = &"Combat"
+
+[node name="PunchHitAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_hitmarker")
+pitch_scale = 0.8
+volume_db = 3.0
+bus = &"Combat"

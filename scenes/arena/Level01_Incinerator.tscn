@@ -1,0 +1,1053 @@
+[gd_scene load_steps=25 format=3 uid="uid://clevel01incinerator"]
+
+[ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="2_hud"]
+[ext_resource type="PackedScene" path="res://scenes/arena/JumpPad.tscn" id="3_jumppad"]
+[ext_resource type="PackedScene" path="res://scenes/arena/ArenaGate.tscn" id="4_gate"]
+[ext_resource type="PackedScene" path="res://scenes/arena/ExplosiveBarrel.tscn" id="5_barrel"]
+[ext_resource type="PackedScene" path="res://scenes/arena/HazardArea.tscn" id="6_hazard"]
+[ext_resource type="Script" path="res://scripts/arena/SectorEncounter.gd" id="7_sector"]
+[ext_resource type="Script" path="res://scripts/arena/LevelExit.gd" id="8_exit"]
+[ext_resource type="Material" uid="uid://bmatindfloor1" path="res://assets/materials/mat_industrial_floor.tres" id="10_floor"]
+[ext_resource type="Material" uid="uid://bmatconcwall1" path="res://assets/materials/mat_concrete_wall.tres" id="11_wall"]
+[ext_resource type="Material" uid="uid://bmathazard1" path="res://assets/materials/mat_hazard_stripe.tres" id="12_hazard"]
+[ext_resource type="Material" path="res://assets/materials/mat_molten_slag.tres" id="13_molten_slag"]
+[ext_resource type="Material" path="res://assets/materials/mat_molten_stream.tres" id="14_molten_stream"]
+[ext_resource type="Script" path="res://scripts/arena/CrucibleCore.gd" id="15_crucible_core"]
+[ext_resource type="Material" path="res://assets/materials/mat_dark_metal_plate.tres" id="16_dark_metal"]
+[ext_resource type="Material" path="res://assets/materials/mat_metal_grating.tres" id="17_grate"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_furnace"]
+sky_top_color = Color(0.08, 0.05, 0.12, 1)
+sky_horizon_color = Color(0.85, 0.32, 0.08, 1)
+sky_curve = 0.12
+ground_bottom_color = Color(0.04, 0.02, 0.03, 1)
+ground_horizon_color = Color(0.6, 0.2, 0.05, 1)
+ground_curve = 0.08
+sun_angle_max = 40.0
+
+[sub_resource type="Sky" id="Sky_furnace"]
+sky_material = SubResource("ProceduralSkyMaterial_furnace")
+
+[sub_resource type="Environment" id="Environment_incinerator"]
+background_mode = 2
+sky = SubResource("Sky_furnace")
+ambient_light_source = 3
+ambient_light_color = Color(0.85, 0.55, 0.45, 1)
+ambient_light_sky_contribution = 0.65
+ambient_light_energy = 1.3
+reflected_light_source = 2
+tonemap_mode = 3
+glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.2
+fog_enabled = true
+fog_light_color = Color(0.38, 0.12, 0.08, 1)
+fog_density = 0.0045
+fog_sky_affect = 0.4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dark_metal"]
+albedo_color = Color(0.12, 0.11, 0.13, 1)
+metallic = 0.8
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_exhaust_rim"]
+albedo_color = Color(1, 0.45, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.45, 0.05, 1)
+emission_energy_multiplier = 6.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_chimney"]
+material = SubResource("StandardMaterial3D_dark_metal")
+top_radius = 6.0
+bottom_radius = 8.5
+height = 95.0
+
+[sub_resource type="TorusMesh" id="TorusMesh_heat_rim"]
+material = SubResource("StandardMaterial3D_exhaust_rim")
+inner_radius = 5.2
+outer_radius = 6.8
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_cooling_tower"]
+material = SubResource("StandardMaterial3D_dark_metal")
+top_radius = 16.0
+bottom_radius = 24.0
+height = 75.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pipe"]
+material = SubResource("StandardMaterial3D_dark_metal")
+top_radius = 2.2
+bottom_radius = 2.2
+height = 160.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ember"]
+shading_mode = 0
+albedo_color = Color(1, 0.55, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ember"]
+material = SubResource("StandardMaterial3D_ember")
+size = Vector3(0.12, 0.12, 0.12)
+
+[sub_resource type="SphereMesh" id="SphereMesh_core"]
+material = ExtResource("13_molten_slag")
+radius = 1.6
+height = 3.2
+
+[sub_resource type="TorusMesh" id="TorusMesh_magnetic_ring"]
+material = SubResource("StandardMaterial3D_dark_metal")
+inner_radius = 2.4
+outer_radius = 3.6
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_encounter_a"]
+size = Vector3(56, 14, 48)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_encounter_b"]
+size = Vector3(76, 22, 80)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_encounter_d"]
+size = Vector3(80, 24, 86)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_exit"]
+size = Vector3(8, 5, 8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_teleport_pad"]
+material = ExtResource("12_hazard")
+size = Vector3(3, 0.2, 3)
+
+[node name="Level01_Incinerator" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_incinerator")
+
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 35, 0)
+light_color = Color(1.0, 0.65, 0.5, 1)
+light_energy = 1.8
+shadow_enabled = true
+
+[node name="LevelGeometry" type="CSGCombiner3D" parent="."]
+use_collision = true
+
+[node name="SpawnRoom_Floor" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 75)
+size = Vector3(36, 1, 30)
+material = ExtResource("10_floor")
+
+[node name="SpawnRoom_WallW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.5, 7, 75)
+size = Vector3(1, 14, 30)
+material = ExtResource("11_wall")
+
+[node name="SpawnRoom_WallE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 7, 75)
+size = Vector3(1, 14, 30)
+material = ExtResource("11_wall")
+
+[node name="SpawnRoom_WallBack" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 90.5)
+size = Vector3(38, 14, 1)
+material = ExtResource("11_wall")
+
+[node name="SpawnRoom_Ceiling" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.5, 75)
+size = Vector3(38, 1, 30)
+material = ExtResource("11_wall")
+
+[node name="TransitionCorridor_Floor" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 56)
+size = Vector3(26, 1, 12)
+material = ExtResource("10_floor")
+
+[node name="TransitionCorridor_WallW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.5, 7, 56)
+size = Vector3(1, 14, 12)
+material = ExtResource("11_wall")
+
+[node name="TransitionCorridor_WallE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 7, 56)
+size = Vector3(1, 14, 12)
+material = ExtResource("11_wall")
+
+[node name="TransitionCorridor_Ceiling" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.5, 56)
+size = Vector3(28, 1, 12)
+material = ExtResource("11_wall")
+
+[node name="SlideVent_Blocker" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 59)
+size = Vector3(26, 3, 2)
+material = ExtResource("12_hazard")
+
+[node name="SectorA_Floor" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 24)
+size = Vector3(64, 1, 56)
+material = ExtResource("10_floor")
+
+[node name="SectorA_WallW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 8.5, 24)
+size = Vector3(1, 18, 56)
+material = ExtResource("11_wall")
+
+[node name="SectorA_WallE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.5, 8.5, 24)
+size = Vector3(1, 18, 56)
+material = ExtResource("11_wall")
+
+[node name="SectorA_WallEntry_W" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 8.5, 52)
+size = Vector3(21, 18, 1)
+material = ExtResource("11_wall")
+
+[node name="SectorA_WallEntry_E" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 8.5, 52)
+size = Vector3(21, 18, 1)
+material = ExtResource("11_wall")
+
+[node name="SectorA_WallExit_W" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 8.5, -4)
+size = Vector3(21, 18, 1)
+material = ExtResource("11_wall")
+
+[node name="SectorA_WallExit_E" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 8.5, -4)
+size = Vector3(21, 18, 1)
+material = ExtResource("11_wall")
+
+[node name="SectorA_PlatW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 1.0, 24)
+size = Vector3(14, 2, 44)
+material = ExtResource("10_floor")
+
+[node name="SectorA_PlatE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1.0, 24)
+size = Vector3(14, 2, 44)
+material = ExtResource("10_floor")
+
+[node name="SectorA_Ceiling" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.5, 24)
+size = Vector3(66, 1, 56)
+material = ExtResource("11_wall")
+
+[node name="SectorA_Truss_N" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16.5, 12)
+size = Vector3(64, 1.5, 1.5)
+material = ExtResource("11_wall")
+
+[node name="SectorA_Truss_Mid" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16.5, 24)
+size = Vector3(64, 1.5, 1.5)
+material = ExtResource("11_wall")
+
+[node name="SectorA_Truss_S" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16.5, 36)
+size = Vector3(64, 1.5, 1.5)
+material = ExtResource("11_wall")
+
+[node name="SectorA_Pillar_NW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 8.5, 12)
+size = Vector3(2, 17, 2)
+material = ExtResource("16_dark_metal")
+
+[node name="SectorA_Pillar_SW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 8.5, 36)
+size = Vector3(2, 17, 2)
+material = ExtResource("16_dark_metal")
+
+[node name="SectorA_Pillar_NE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 8.5, 12)
+size = Vector3(2, 17, 2)
+material = ExtResource("16_dark_metal")
+
+[node name="SectorA_Pillar_SE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 8.5, 36)
+size = Vector3(2, 17, 2)
+material = ExtResource("16_dark_metal")
+
+[node name="AcidCanal_Pit" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.5, -13.5)
+size = Vector3(48, 12, 19)
+material = ExtResource("11_wall")
+
+[node name="AcidCanal_WallW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 8.5, -13.5)
+size = Vector3(1, 26, 19)
+material = ExtResource("11_wall")
+
+[node name="AcidCanal_WallE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.5, 8.5, -13.5)
+size = Vector3(1, 26, 19)
+material = ExtResource("11_wall")
+
+[node name="AcidCanal_CatwalkLanding" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -13.5)
+size = Vector3(26, 4, 19)
+material = ExtResource("10_floor")
+
+[node name="CoreCrucible_Floor" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -65)
+size = Vector3(80, 1, 84)
+material = ExtResource("10_floor")
+
+[node name="CoreCrucible_WallW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40.5, 13.5, -65)
+size = Vector3(1, 28, 84)
+material = ExtResource("11_wall")
+
+[node name="CoreCrucible_WallE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.5, 13.5, -65)
+size = Vector3(1, 28, 84)
+material = ExtResource("11_wall")
+
+[node name="CoreCrucible_WallN" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.5, -107.5)
+size = Vector3(82, 28, 1)
+material = ExtResource("11_wall")
+
+[node name="CoreCrucible_WallS_W" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 13.5, -23)
+size = Vector3(26, 28, 1)
+material = ExtResource("11_wall")
+
+[node name="CoreCrucible_WallS_E" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.5, 13.5, -23)
+size = Vector3(26, 28, 1)
+material = ExtResource("11_wall")
+
+[node name="CoreCrucible_WallS_Top" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20.5, -23)
+size = Vector3(28, 14, 1)
+material = ExtResource("11_wall")
+
+[node name="CruciblePillarNW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 13.5, -48)
+size = Vector3(4, 28, 4)
+material = ExtResource("16_dark_metal")
+
+[node name="CruciblePillarNE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 13.5, -48)
+size = Vector3(4, 28, 4)
+material = ExtResource("16_dark_metal")
+
+[node name="CruciblePillarSW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 13.5, -82)
+size = Vector3(4, 28, 4)
+material = ExtResource("16_dark_metal")
+
+[node name="CruciblePillarSE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 13.5, -82)
+size = Vector3(4, 28, 4)
+material = ExtResource("16_dark_metal")
+
+[node name="CentralSmelter_Base" type="CSGCylinder3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -65)
+radius = 6.0
+height = 1.8
+sides = 20
+material = ExtResource("11_wall")
+
+[node name="CentralSmelter_Rim" type="CSGTorus3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, -65)
+inner_radius = 5.0
+outer_radius = 6.2
+sides = 20
+ring_sides = 6
+material = ExtResource("12_hazard")
+
+[node name="CentralSmelter_Liquid" type="CSGCylinder3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, -65)
+radius = 5.2
+height = 0.4
+sides = 20
+material = ExtResource("13_molten_slag")
+
+[node name="CatwalkNorth" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.5, -98)
+size = Vector3(68, 1, 10)
+material = ExtResource("17_grate")
+
+[node name="CatwalkWest" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 7.5, -65)
+size = Vector3(14, 1, 64)
+material = ExtResource("17_grate")
+
+[node name="CatwalkEast" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, 7.5, -65)
+size = Vector3(14, 1, 64)
+material = ExtResource("17_grate")
+
+[node name="SectorC_LandingFloor" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -112)
+size = Vector3(26, 1, 10)
+material = ExtResource("10_floor")
+
+[node name="SectorC_LandingWallW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.5, 6, -112)
+size = Vector3(1, 14, 10)
+material = ExtResource("11_wall")
+
+[node name="SectorC_LandingWallE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 6, -112)
+size = Vector3(1, 14, 10)
+material = ExtResource("11_wall")
+
+[node name="SectorC_ShaftPit" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18.5, -142)
+size = Vector3(48, 1, 56)
+material = ExtResource("10_floor")
+
+[node name="SectorC_ShaftWallW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 3, -142)
+size = Vector3(1, 44, 56)
+material = ExtResource("11_wall")
+
+[node name="SectorC_ShaftWallE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.5, 3, -142)
+size = Vector3(1, 44, 56)
+material = ExtResource("11_wall")
+
+[node name="SectorC_ShaftCeiling" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25.5, -142)
+size = Vector3(50, 1, 56)
+material = ExtResource("11_wall")
+
+[node name="SectorC_SlideChute" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 0.920505, 0.390731, 0, -0.390731, 0.920505, 0, -8.5, -132)
+size = Vector3(26, 1, 48)
+material = ExtResource("12_hazard")
+
+[node name="SectorC_MidPlatform" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -9.5, -144)
+size = Vector3(20, 1, 14)
+material = ExtResource("10_floor")
+
+[node name="SectorC_DropBasin_Hazard" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18.2, -134)
+size = Vector3(32, 0.5, 16)
+material = ExtResource("13_molten_slag")
+
+[node name="SectorC_LowerCatwalk" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18.5, -158)
+size = Vector3(24, 1, 16)
+material = ExtResource("10_floor")
+
+[node name="SectorD_MainFloor" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18.5, -214)
+size = Vector3(88, 1, 96)
+material = ExtResource("10_floor")
+
+[node name="SectorD_WallW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44.5, -1, -214)
+size = Vector3(1, 34, 96)
+material = ExtResource("11_wall")
+
+[node name="SectorD_WallE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.5, -1, -214)
+size = Vector3(1, 34, 96)
+material = ExtResource("11_wall")
+
+[node name="SectorD_WallS_W" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.5, -1, -166)
+size = Vector3(28, 34, 1)
+material = ExtResource("11_wall")
+
+[node name="SectorD_WallS_E" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, -1, -166)
+size = Vector3(28, 34, 1)
+material = ExtResource("11_wall")
+
+[node name="SectorD_WallN" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, -262.5)
+size = Vector3(90, 34, 1)
+material = ExtResource("11_wall")
+
+[node name="SectorD_Ceiling" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16.5, -214)
+size = Vector3(90, 1, 96)
+material = ExtResource("11_wall")
+
+[node name="SectorD_ElevatedArena" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -13.5, -214)
+size = Vector3(26, 1, 26)
+material = ExtResource("10_floor")
+
+[node name="SectorD_CatwalkW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, -9.5, -214)
+size = Vector3(14, 1, 76)
+material = ExtResource("17_grate")
+
+[node name="SectorD_CatwalkE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, -9.5, -214)
+size = Vector3(14, 1, 76)
+material = ExtResource("17_grate")
+
+[node name="SectorD_CatwalkBridgeN" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -9.5, -248)
+size = Vector3(72, 1, 12)
+material = ExtResource("17_grate")
+
+[node name="SectorD_VatBodyW" type="CSGCylinder3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, -11.5, -214)
+radius = 4.8
+height = 14.0
+sides = 20
+material = ExtResource("16_dark_metal")
+
+[node name="SectorD_VatRimW" type="CSGTorus3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, -4.3, -214)
+inner_radius = 4.0
+outer_radius = 5.2
+sides = 20
+ring_sides = 6
+material = ExtResource("12_hazard")
+
+[node name="SectorD_VatLiquidW" type="CSGCylinder3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, -4.6, -214)
+radius = 4.2
+height = 0.5
+sides = 20
+material = ExtResource("13_molten_slag")
+
+[node name="SectorD_VatBodyE" type="CSGCylinder3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, -11.5, -214)
+radius = 4.8
+height = 14.0
+sides = 20
+material = ExtResource("16_dark_metal")
+
+[node name="SectorD_VatRimE" type="CSGTorus3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, -4.3, -214)
+inner_radius = 4.0
+outer_radius = 5.2
+sides = 20
+ring_sides = 6
+material = ExtResource("12_hazard")
+
+[node name="SectorD_VatLiquidE" type="CSGCylinder3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, -4.6, -214)
+radius = 4.2
+height = 0.5
+sides = 20
+material = ExtResource("13_molten_slag")
+
+[node name="FinalVault_Floor" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18.5, -276)
+size = Vector3(24, 1, 26)
+material = ExtResource("10_floor")
+
+[node name="FinalVault_WallW" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, -13, -276)
+size = Vector3(1, 12, 26)
+material = ExtResource("11_wall")
+
+[node name="FinalVault_WallE" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, -13, -276)
+size = Vector3(1, 12, 26)
+material = ExtResource("11_wall")
+
+[node name="FinalVault_WallBack" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -13, -289.5)
+size = Vector3(26, 12, 1)
+material = ExtResource("11_wall")
+
+[node name="FinalVault_Ceiling" type="CSGBox3D" parent="LevelGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.5, -276)
+size = Vector3(26, 1, 26)
+material = ExtResource("11_wall")
+
+[node name="GateA_Entry" parent="." instance=ExtResource("4_gate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 52)
+is_initially_open = true
+
+[node name="GateA_Exit" parent="." instance=ExtResource("4_gate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+
+[node name="GateB_Entry" parent="." instance=ExtResource("4_gate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -23)
+is_initially_open = true
+
+[node name="GateB_Exit" parent="." instance=ExtResource("4_gate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -107)
+
+[node name="GateC_Exit" parent="." instance=ExtResource("4_gate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18, -162)
+is_initially_open = true
+
+[node name="GateFinal_Exit" parent="." instance=ExtResource("4_gate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18, -252)
+
+[node name="SectorA_Encounter" type="Area3D" parent="." node_paths=PackedStringArray("entry_gate", "exit_gate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 24)
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("7_sector")
+sector_name = "SLAG CONDUIT"
+entry_gate = NodePath("../GateA_Entry")
+exit_gate = NodePath("../GateA_Exit")
+target_kills = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SectorA_Encounter"]
+shape = SubResource("BoxShape3D_encounter_a")
+
+[node name="SP1" type="Node3D" parent="SectorA_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -12)
+
+[node name="SP2" type="Node3D" parent="SectorA_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -12)
+
+[node name="SP3" type="Node3D" parent="SectorA_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -16)
+
+[node name="SP4" type="Node3D" parent="SectorA_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, 8)
+
+[node name="SP5" type="Node3D" parent="SectorA_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 8)
+
+[node name="SectorB_Encounter" type="Area3D" parent="." node_paths=PackedStringArray("entry_gate", "exit_gate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, -65)
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("7_sector")
+sector_name = "THE CORE CRUCIBLE"
+entry_gate = NodePath("../GateB_Entry")
+exit_gate = NodePath("../GateB_Exit")
+target_kills = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SectorB_Encounter"]
+shape = SubResource("BoxShape3D_encounter_b")
+
+[node name="SP1" type="Node3D" parent="SectorB_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, -6.5, -15)
+
+[node name="SP2" type="Node3D" parent="SectorB_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, -6.5, -15)
+
+[node name="SP3" type="Node3D" parent="SectorB_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.5, -25)
+
+[node name="SP4" type="Node3D" parent="SectorB_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1.0, 10)
+
+[node name="SP5" type="Node3D" parent="SectorB_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 1.0, 10)
+
+[node name="SectorD_Encounter" type="Area3D" parent="." node_paths=PackedStringArray("entry_gate", "exit_gate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -11, -214)
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("7_sector")
+sector_name = "CRYOGENIC CORE"
+entry_gate = NodePath("../GateC_Exit")
+exit_gate = NodePath("../GateFinal_Exit")
+target_kills = 12
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SectorD_Encounter"]
+shape = SubResource("BoxShape3D_encounter_d")
+
+[node name="SP1" type="Node3D" parent="SectorD_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, -6.5, 15)
+
+[node name="SP2" type="Node3D" parent="SectorD_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, -6.5, 15)
+
+[node name="SP3" type="Node3D" parent="SectorD_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)
+
+[node name="SP4" type="Node3D" parent="SectorD_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 2, -18)
+
+[node name="SP5" type="Node3D" parent="SectorD_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 2, -18)
+
+[node name="SP6" type="Node3D" parent="SectorD_Encounter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, -22)
+
+[node name="JumpPad_SectorA" parent="." instance=ExtResource("3_jumppad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 24)
+launch_force = 16.0
+
+[node name="JumpPad_Chasm" parent="." instance=ExtResource("3_jumppad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+launch_force = 18.0
+
+[node name="JumpPad_AcidRecovery" parent="." instance=ExtResource("3_jumppad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.5, -13.5)
+launch_force = 24.0
+
+[node name="JumpPad_CrucibleLeft" parent="." instance=ExtResource("3_jumppad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 0, -65)
+launch_force = 20.0
+
+[node name="JumpPad_CrucibleRight" parent="." instance=ExtResource("3_jumppad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0, -65)
+launch_force = 20.0
+
+[node name="JumpPad_ShaftDrop" parent="." instance=ExtResource("3_jumppad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18, -150)
+launch_force = 24.0
+
+[node name="JumpPad_SectorD_West" parent="." instance=ExtResource("3_jumppad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, -18, -195)
+launch_force = 20.0
+
+[node name="JumpPad_SectorD_East" parent="." instance=ExtResource("3_jumppad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, -18, -195)
+launch_force = 20.0
+
+[node name="JumpPad_SectorD_Center" parent="." instance=ExtResource("3_jumppad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18, -230)
+launch_force = 22.0
+
+[node name="Hazard_AcidCanal" parent="." instance=ExtResource("6_hazard")]
+transform = Transform3D(1.8, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.8, -13.5)
+
+[node name="Hazard_CrucibleCenter" parent="." instance=ExtResource("6_hazard")]
+transform = Transform3D(0.9, 0, 0, 0, 1, 0, 0, 0, 0.9, 0, -0.3, -65)
+
+[node name="Hazard_SectorC_Drop" parent="." instance=ExtResource("6_hazard")]
+transform = Transform3D(1.5, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18.2, -134)
+
+[node name="Hazard_SectorD_VatW" parent="." instance=ExtResource("6_hazard")]
+transform = Transform3D(0.7, 0, 0, 0, 1, 0, 0, 0, 0.7, -20, -4.5, -214)
+
+[node name="Hazard_SectorD_VatE" parent="." instance=ExtResource("6_hazard")]
+transform = Transform3D(0.7, 0, 0, 0, 1, 0, 0, 0, 0.7, 20, -4.5, -214)
+
+[node name="BarrelA1" parent="." instance=ExtResource("5_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, 18)
+
+[node name="BarrelA2" parent="." instance=ExtResource("5_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 18)
+
+[node name="BarrelB1" parent="." instance=ExtResource("5_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -42)
+
+[node name="BarrelB2" parent="." instance=ExtResource("5_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -42)
+
+[node name="BarrelB3" parent="." instance=ExtResource("5_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 8.0, -65)
+
+[node name="BarrelB4" parent="." instance=ExtResource("5_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, 8.0, -65)
+
+[node name="BarrelD1" parent="." instance=ExtResource("5_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, -18.0, -195)
+
+[node name="BarrelD2" parent="." instance=ExtResource("5_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, -18.0, -195)
+
+[node name="BarrelD3" parent="." instance=ExtResource("5_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, -9.0, -230)
+
+[node name="BarrelD4" parent="." instance=ExtResource("5_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, -9.0, -230)
+
+[node name="LevelExit" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -16.5, -282)
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("8_exit")
+next_scene_path = "res://scenes/arena/Level02_Cathedral.tscn"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LevelExit"]
+shape = SubResource("BoxShape3D_exit")
+
+[node name="TeleportPad" type="MeshInstance3D" parent="LevelExit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.4, 0)
+mesh = SubResource("BoxMesh_teleport_pad")
+
+[node name="ExitLight" type="OmniLight3D" parent="LevelExit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+light_color = Color(0.1, 1.0, 0.6, 1)
+light_energy = 5.0
+omni_range = 10.0
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 75)
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]
+
+[node name="SpawnRoom_CeilingLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.0, 75)
+light_color = Color(1, 0.85, 0.65, 1)
+light_energy = 4.0
+omni_range = 24.0
+
+[node name="SlideVent_WarningLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.0, 58)
+light_color = Color(1, 0.55, 0.05, 1)
+light_energy = 4.5
+omni_range = 14.0
+
+[node name="SectorA_Light1" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 36)
+light_color = Color(0.95, 0.9, 1, 1)
+light_energy = 5.0
+omni_range = 34.0
+
+[node name="SectorA_Light2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 12)
+light_color = Color(1, 0.8, 0.6, 1)
+light_energy = 5.0
+omni_range = 34.0
+
+[node name="SectorA_PlatLightW" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 6, 24)
+light_color = Color(1, 0.45, 0.2, 1)
+light_energy = 4.0
+omni_range = 20.0
+
+[node name="SectorA_PlatLightE" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 6, 24)
+light_color = Color(0.25, 0.85, 1, 1)
+light_energy = 4.0
+omni_range = 20.0
+
+[node name="SectorA_GateLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, -3.5)
+light_color = Color(0.2, 0.85, 1, 1)
+light_energy = 4.0
+omni_range = 14.0
+
+[node name="AcidCanal_FloodLight" type="SpotLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 16, -13.5)
+light_color = Color(0.4, 1, 0.6, 1)
+light_energy = 5.0
+spot_range = 28.0
+spot_angle = 55.0
+
+[node name="AcidCanal_CatwalkLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.0, -13.5)
+light_color = Color(1, 0.85, 0.6, 1)
+light_energy = 4.0
+omni_range = 18.0
+
+[node name="GateB_EntryLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, -23)
+light_color = Color(1, 0.3, 0.1, 1)
+light_energy = 4.5
+omni_range = 16.0
+
+[node name="CoreCrucible_CenterSpot" type="SpotLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 26, -65)
+light_color = Color(1, 0.8, 0.65, 1)
+light_energy = 7.0
+spot_range = 42.0
+spot_angle = 65.0
+
+[node name="CrucibleLight_NW" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 12, -48)
+light_color = Color(1, 0.45, 0.2, 1)
+light_energy = 5.0
+omni_range = 26.0
+
+[node name="CrucibleLight_NE" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 12, -48)
+light_color = Color(0.25, 0.8, 1, 1)
+light_energy = 5.0
+omni_range = 26.0
+
+[node name="CrucibleLight_SW" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 12, -82)
+light_color = Color(0.25, 0.8, 1, 1)
+light_energy = 5.0
+omni_range = 26.0
+
+[node name="CrucibleLight_SE" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 12, -82)
+light_color = Color(1, 0.45, 0.2, 1)
+light_energy = 5.0
+omni_range = 26.0
+
+[node name="CatwalkLight_North" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11, -98)
+light_color = Color(1, 0.85, 0.5, 1)
+light_energy = 5.0
+omni_range = 26.0
+
+[node name="Shaft_DescentLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, -130)
+light_color = Color(1, 0.5, 0.1, 1)
+light_energy = 5.0
+omni_range = 30.0
+
+[node name="Shaft_BaseLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15, -152)
+light_color = Color(0.2, 0.85, 1, 1)
+light_energy = 4.5
+omni_range = 24.0
+
+[node name="SectorD_CenterSpot" type="SpotLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 12, -214)
+light_color = Color(0.9, 0.95, 1, 1)
+light_energy = 8.0
+spot_range = 46.0
+spot_angle = 65.0
+
+[node name="SectorD_VatLight_W" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, -3, -214)
+light_color = Color(1, 0.45, 0.1, 1)
+light_energy = 5.0
+omni_range = 24.0
+
+[node name="SectorD_VatLight_E" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, -3, -214)
+light_color = Color(1, 0.45, 0.1, 1)
+light_energy = 5.0
+omni_range = 24.0
+
+[node name="SectorD_NorthBridgeLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, -248)
+light_color = Color(0.2, 0.8, 1, 1)
+light_energy = 4.5
+omni_range = 24.0
+
+[node name="FinalVault_Light" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -11, -276)
+light_color = Color(0.1, 1.0, 0.5, 1)
+light_energy = 5.5
+omni_range = 20.0
+
+
+[node name="BackgroundScenery" type="Node3D" parent="."]
+
+[node name="CoolingTower_West" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75, 25, 10)
+mesh = SubResource("CylinderMesh_cooling_tower")
+
+[node name="CoolingTower_East" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 75, 25, 10)
+mesh = SubResource("CylinderMesh_cooling_tower")
+
+[node name="ChimneyStack_West" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 40, -65)
+mesh = SubResource("CylinderMesh_chimney")
+
+[node name="HeatRim_West" type="MeshInstance3D" parent="BackgroundScenery/ChimneyStack_West"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 47.5, 0)
+mesh = SubResource("TorusMesh_heat_rim")
+
+[node name="ChimneyStack_East" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 40, -65)
+mesh = SubResource("CylinderMesh_chimney")
+
+[node name="HeatRim_East" type="MeshInstance3D" parent="BackgroundScenery/ChimneyStack_East"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 47.5, 0)
+mesh = SubResource("TorusMesh_heat_rim")
+
+[node name="MegaChimney_North" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1.4, 0, 0, 0, 1.3, 0, 0, 0, 1.4, 0, 55, -145)
+mesh = SubResource("CylinderMesh_chimney")
+
+[node name="HeatRim_North" type="MeshInstance3D" parent="BackgroundScenery/MegaChimney_North"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 47.5, 0)
+mesh = SubResource("TorusMesh_heat_rim")
+
+[node name="OverheadPipe_1" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 32, -45)
+mesh = SubResource("CylinderMesh_pipe")
+
+[node name="OverheadPipe_2" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 35, -80)
+mesh = SubResource("CylinderMesh_pipe")
+
+[node name="FurnaceEmbers" type="CPUParticles3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25, -25)
+amount = 80
+lifetime = 6.0
+mesh = SubResource("BoxMesh_ember")
+emission_shape = 3
+emission_box_extents = Vector3(60, 20, 60)
+direction = Vector3(0.3, 0.8, -0.4)
+spread = 35.0
+gravity = Vector3(0, 1.5, 0)
+initial_velocity_min = 1.0
+initial_velocity_max = 3.5
+
+[node name="CrucibleMachinery" type="Node3D" parent="."]
+
+[node name="WaterfallStream_West" type="CSGBox3D" parent="CrucibleMachinery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 8.5, -65)
+size = Vector3(0.5, 17, 2.8)
+material = ExtResource("14_molten_stream")
+
+[node name="WaterfallLight_West" type="OmniLight3D" parent="CrucibleMachinery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 3, -65)
+light_color = Color(1, 0.5, 0.1, 1)
+light_energy = 5.0
+omni_range = 14.0
+
+[node name="WaterfallSplash_West" type="CPUParticles3D" parent="CrucibleMachinery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.4, -65)
+amount = 25
+lifetime = 0.8
+mesh = SubResource("BoxMesh_ember")
+direction = Vector3(0.5, 0.8, 0)
+spread = 45.0
+initial_velocity_min = 2.5
+initial_velocity_max = 5.0
+gravity = Vector3(0, -9.8, 0)
+
+[node name="WaterfallStream_East" type="CSGBox3D" parent="CrucibleMachinery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 8.5, -65)
+size = Vector3(0.5, 17, 2.8)
+material = ExtResource("14_molten_stream")
+
+[node name="WaterfallLight_East" type="OmniLight3D" parent="CrucibleMachinery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 3, -65)
+light_color = Color(1, 0.5, 0.1, 1)
+light_energy = 5.0
+omni_range = 14.0
+
+[node name="WaterfallSplash_East" type="CPUParticles3D" parent="CrucibleMachinery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0.4, -65)
+amount = 25
+lifetime = 0.8
+mesh = SubResource("BoxMesh_ember")
+direction = Vector3(-0.5, 0.8, 0)
+spread = 45.0
+initial_velocity_min = 2.5
+initial_velocity_max = 5.0
+gravity = Vector3(0, -9.8, 0)
+
+[node name="TwinFeeder_West" type="CSGBox3D" parent="CrucibleMachinery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 8, -65)
+size = Vector3(0.7, 13, 0.7)
+material = ExtResource("14_molten_stream")
+
+[node name="TwinFeeder_East" type="CSGBox3D" parent="CrucibleMachinery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 8, -65)
+size = Vector3(0.7, 13, 0.7)
+material = ExtResource("14_molten_stream")
+
+[node name="CentralVat_Sparks" type="CPUParticles3D" parent="CrucibleMachinery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -65)
+amount = 40
+lifetime = 1.2
+mesh = SubResource("BoxMesh_ember")
+direction = Vector3(0, 1, 0)
+spread = 35.0
+initial_velocity_min = 3.5
+initial_velocity_max = 6.5
+gravity = Vector3(0, -6, 0)
+
+[node name="SuspendedCore" type="Node3D" parent="CrucibleMachinery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.5, -65)
+script = ExtResource("15_crucible_core")
+
+[node name="MagneticRing" type="MeshInstance3D" parent="CrucibleMachinery/SuspendedCore"]
+mesh = SubResource("TorusMesh_magnetic_ring")
+
+[node name="PlasmaCore" type="MeshInstance3D" parent="CrucibleMachinery/SuspendedCore"]
+mesh = SubResource("SphereMesh_core")
+
+[node name="CoreLight" type="OmniLight3D" parent="CrucibleMachinery/SuspendedCore"]
+light_color = Color(1, 0.45, 0.1, 1)
+light_energy = 8.0
+omni_range = 34.0
+shadow_enabled = true
+
+[node name="JumpPad_Crucible" parent="CrucibleMachinery" instance=ExtResource("3_jumppad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -34.5)
+launch_force = 22.0

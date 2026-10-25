@@ -1,0 +1,54 @@
+[gd_scene load_steps=6 format=3 uid="uid://cbarexplo123"]
+
+[ext_resource type="Script" path="res://scripts/arena/ExplosiveBarrel.gd" id="1_script"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_barrel"]
+height = 1.15
+radius = 0.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_barrel"]
+albedo_color = Color(0.85, 0.12, 0.08, 1)
+metallic = 0.8
+roughness = 0.3
+emission_enabled = true
+emission = Color(0.4, 0.05, 0.02, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_barrel"]
+material = SubResource("StandardMaterial3D_barrel")
+top_radius = 0.45
+bottom_radius = 0.45
+height = 1.15
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stripe"]
+albedo_color = Color(0.95, 0.7, 0.05, 1)
+emission_enabled = true
+emission = Color(0.8, 0.5, 0.02, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="TorusMesh" id="TorusMesh_ring"]
+material = SubResource("StandardMaterial3D_stripe")
+inner_radius = 0.44
+outer_radius = 0.48
+
+[node name="ExplosiveBarrel" type="StaticBody3D" groups=["explosives"]]
+collision_layer = 1
+collision_mask = 6
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.58, 0)
+shape = SubResource("CylinderShape3D_barrel")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.58, 0)
+mesh = SubResource("CylinderMesh_barrel")
+
+[node name="WarningRing" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.58, 0)
+mesh = SubResource("TorusMesh_ring")
+
+[node name="WarningLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+light_color = Color(1, 0.35, 0.1, 1)
+light_energy = 1.2
+omni_range = 3.0

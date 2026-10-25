@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bmatmoltenstream1"]
+
+[ext_resource type="Shader" path="res://shaders/molten_stream.gdshader" id="1_shader"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_shader")
+shader_parameter/core_color = Color(1, 0.9, 0.45, 1)
+shader_parameter/magma_color = Color(0.95, 0.28, 0.03, 1)
+shader_parameter/flow_speed = 3.2
+shader_parameter/emission_intensity = 5.5

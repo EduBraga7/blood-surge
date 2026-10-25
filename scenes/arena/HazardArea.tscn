@@ -1,0 +1,70 @@
+[gd_scene load_steps=9 format=3 uid="uid://chazardpool1"]
+
+[ext_resource type="Script" path="res://scripts/arena/HazardArea.gd" id="1_script"]
+[ext_resource type="Material" uid="uid://bmattovsludge1" path="res://assets/materials/mat_toxic_sludge.tres" id="2_sludge"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hazard"]
+size = Vector3(20, 1.2, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sludge"]
+material = ExtResource("2_sludge")
+size = Vector3(20, 0.4, 10)
+
+[sub_resource type="SphereMesh" id="SphereMesh_bubble"]
+material = ExtResource("2_sludge")
+radius = 0.12
+height = 0.24
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vapor"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.25, 0.95, 0.35, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vapor"]
+material = SubResource("StandardMaterial3D_vapor")
+size = Vector3(0.5, 0.5, 0.5)
+
+[node name="HazardArea" type="Area3D"]
+collision_layer = 1
+collision_mask = 6
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("BoxShape3D_hazard")
+
+[node name="SludgeMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+mesh = SubResource("BoxMesh_sludge")
+
+[node name="ToxicLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+light_color = Color(0.2, 1, 0.3, 1)
+light_energy = 3.5
+omni_range = 8.0
+
+[node name="BubbleParticles" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+amount = 20
+lifetime = 1.4
+mesh = SubResource("SphereMesh_bubble")
+emission_shape = 3
+emission_box_extents = Vector3(9.5, 0.1, 4.5)
+direction = Vector3(0, 1, 0)
+spread = 20.0
+gravity = Vector3(0, 3, 0)
+initial_velocity_min = 0.5
+initial_velocity_max = 1.8
+
+[node name="VaporParticles" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+amount = 16
+lifetime = 2.2
+mesh = SubResource("BoxMesh_vapor")
+emission_shape = 3
+emission_box_extents = Vector3(9.5, 0.2, 4.5)
+direction = Vector3(0, 1, 0)
+spread = 25.0
+gravity = Vector3(0, 1.8, 0)
+initial_velocity_min = 0.6
+initial_velocity_max = 2.0

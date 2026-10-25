@@ -1,0 +1,23 @@
+# Godot 4.x gitignore
+.godot/
+*.translation
+
+# Mono / C#
+.mono/
+data_*/
+mono_crash.*.json
+
+# System & IDE files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tmp
+*.bak
+*.swp
+*~
+.vscode/
+.idea/
+
+# Runtime / crash logs
+*.log
+crash_dump*

@@ -1,0 +1,48 @@
+[gd_scene load_steps=7 format=3 uid="uid://cshotgunshell001"]
+
+[ext_resource type="Script" path="res://scripts/weapons/ShotgunShellCasing.gd" id="1_script"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_casing"]
+radius = 0.016
+height = 0.07
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_brass"]
+albedo_color = Color(0.88, 0.68, 0.2, 1)
+metallic = 0.95
+roughness = 0.22
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_brass"]
+material = SubResource("StandardMaterial3D_brass")
+top_radius = 0.016
+bottom_radius = 0.016
+height = 0.022
+radial_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hull"]
+albedo_color = Color(0.78, 0.08, 0.08, 1)
+metallic = 0.15
+roughness = 0.38
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hull"]
+material = SubResource("StandardMaterial3D_hull")
+top_radius = 0.015
+bottom_radius = 0.015
+height = 0.048
+radial_segments = 12
+
+[node name="ShotgunShellCasing" type="RigidBody3D"]
+collision_layer = 0
+collision_mask = 1
+mass = 0.08
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CylinderShape3D_casing")
+
+[node name="BrassBase" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.024, 0)
+mesh = SubResource("CylinderMesh_brass")
+
+[node name="RedHull" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.011, 0)
+mesh = SubResource("CylinderMesh_hull")

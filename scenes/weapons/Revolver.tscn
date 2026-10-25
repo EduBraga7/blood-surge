@@ -1,0 +1,57 @@
+[gd_scene load_steps=8 format=3 uid="uid://crevolver98765"]
+
+[ext_resource type="Script" path="res://scripts/weapons/Revolver.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/models/revolver.glb" id="2_model"]
+[ext_resource type="AudioStream" path="res://assets/audio/revolver_shot.wav" id="3_shot"]
+[ext_resource type="AudioStream" path="res://assets/audio/revolver_charge.wav" id="4_charge"]
+[ext_resource type="AudioStream" path="res://assets/audio/revolver_pierce.wav" id="5_pierce"]
+[ext_resource type="AudioStream" path="res://assets/audio/shells_insert.wav" id="6_reload"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flash"]
+shading_mode = 0
+albedo_color = Color(0.25, 0.95, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_flash"]
+material = SubResource("StandardMaterial3D_flash")
+radius = 0.04
+height = 0.08
+
+[node name="Revolver" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Rig" type="Node3D" parent="."]
+
+[node name="Model" parent="Rig" instance=ExtResource("2_model")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="MuzzleFlash" type="MeshInstance3D" parent="Rig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, -0.46)
+visible = false
+mesh = SubResource("SphereMesh_flash")
+
+[node name="MuzzleLight" type="OmniLight3D" parent="Rig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -0.48)
+visible = false
+light_color = Color(0.2, 0.95, 1, 1)
+light_energy = 6.0
+omni_range = 8.0
+
+[node name="ShootAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_shot")
+volume_db = 1.0
+bus = &"SFX"
+
+[node name="ChargeAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_charge")
+volume_db = 0.0
+bus = &"SFX"
+
+[node name="PierceAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_pierce")
+volume_db = 3.0
+bus = &"SFX"
+
+[node name="ReloadAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_reload")
+volume_db = -4.0
+bus = &"SFX"

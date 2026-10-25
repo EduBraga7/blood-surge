@@ -1,0 +1,395 @@
+[gd_scene load_steps=10 format=3 uid="uid://cmainmenu12345"]
+
+[ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1_script"]
+[ext_resource type="Shader" path="res://shaders/retro_crunch.gdshader" id="2_shader"]
+[ext_resource type="AudioStream" path="res://assets/audio/metal_loop.wav" id="3_music"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_retro"]
+shader = ExtResource("2_shader")
+shader_parameter/enabled = true
+shader_parameter/dither_strength = 0.35
+shader_parameter/color_depth = 32.0
+shader_parameter/vignette_intensity = 0.55
+shader_parameter/vignette_opacity = 0.65
+shader_parameter/pixel_size = 1.0
+
+[sub_resource type="Curve" id="Curve_ember"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.2, 1), 0.0, 0.0, 0, 0, Vector2(0.8, 0.8), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Gradient" id="Gradient_ember"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 0.8, 0.2, 1, 1, 0.3, 0.05, 1, 0.4, 0.05, 0.05, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
+bg_color = Color(0.1, 0.11, 0.14, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.35, 0.42, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+bg_color = Color(0.35, 0.06, 0.06, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.25, 0.2, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.05, 0.05, 0.08, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.18, 0.18, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.03, 0.05, 1)
+
+[node name="Embers" type="CPUParticles2D" parent="."]
+position = Vector2(640, 740)
+amount = 45
+lifetime = 4.5
+emission_shape = 3
+emission_rect_extents = Vector2(650, 10)
+direction = Vector2(0, -1)
+spread = 20.0
+gravity = Vector2(0, -15)
+initial_velocity_min = 60.0
+initial_velocity_max = 140.0
+scale_amount_min = 3.0
+scale_amount_max = 6.0
+scale_amount_curve = SubResource("Curve_ember")
+color_ramp = SubResource("Gradient_ember")
+
+[node name="RetroPostProcess" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_retro")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="TitleGroup" type="VBoxContainer" parent="CenterContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="MainTitle" type="Label" parent="CenterContainer/VBox/TitleGroup"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.12, 0.12, 1)
+theme_override_colors/font_shadow_color = Color(0.35, 0.02, 0.02, 1)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 64
+text = "BLOODSURGE"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterContainer/VBox/TitleGroup"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.65, 0.15, 1)
+theme_override_font_sizes/font_size = 18
+text = "HIGH-SPEED ADRENALINE MOVEMENT SHOOTER"
+horizontal_alignment = 1
+
+[node name="Motto" type="Label" parent="CenterContainer/VBox/TitleGroup"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "[ BLOOD IS FUEL • SPEED IS ARMOR ]"
+horizontal_alignment = 1
+
+[node name="MenuButtons" type="VBoxContainer" parent="CenterContainer/VBox"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 14
+
+[node name="StartBtn" type="Button" parent="CenterContainer/VBox/MenuButtons"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "START CAMPAIGN (LEVEL 01)"
+
+[node name="LevelSelectBtn" type="Button" parent="CenterContainer/VBox/MenuButtons"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "SELECT LEVEL / MAP"
+
+[node name="ControlsBtn" type="Button" parent="CenterContainer/VBox/MenuButtons"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "CONTROLS MANUAL"
+
+[node name="QuitBtn" type="Button" parent="CenterContainer/VBox/MenuButtons"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "QUIT GAME"
+
+[node name="VersionLabel" type="Label" parent="CenterContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.45, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "BLOODSURGE v0.2.0 • GODOT 4.7 FORWARD+"
+horizontal_alignment = 1
+
+[node name="ControlsModal" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -230.0
+offset_right = 300.0
+offset_bottom = 230.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="ControlsModal"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="ControlsModal/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="ControlsModal/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.1, 1)
+theme_override_font_sizes/font_size = 24
+text = "OPERATIONAL CONTROLS"
+horizontal_alignment = 1
+
+[node name="Grid" type="GridContainer" parent="ControlsModal/Margin/VBox"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 8
+
+[node name="C1" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "W, A, S, D :"
+
+[node name="D1" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "High-speed 8-way movement (11 m/s)"
+
+[node name="C2" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "SPACE :"
+
+[node name="D2" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "Jump / Double Jump"
+
+[node name="C3" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "SHIFT :"
+
+[node name="D3" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "Omnidirectional Dash (3 charges)"
+
+[node name="C4" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "CTRL :"
+
+[node name="D4" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "Ground Slide (Slide-hopping at 28 m/s)"
+
+[node name="C5" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "1, 2 / Q / WHEEL :"
+
+[node name="D5" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "Switch Weapon (Shotgun / Piercer Revolver)"
+
+[node name="C6" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "LMB / RMB :"
+
+[node name="D6" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "Primary Blast / Charge Piercing Beam"
+
+[node name="C7" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "F :"
+
+[node name="D7" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "Melee Punch / Deflect Projectiles (Parry)"
+
+[node name="C8" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "ESC :"
+
+[node name="D8" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "Pause Game / System Menu"
+
+[node name="C9" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+text = "BLOOD SIPHON :"
+
+[node name="D9" type="Label" parent="ControlsModal/Margin/VBox/Grid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.25, 0.25, 1)
+text = "Point-blank kills (<4.5m) restore HP!"
+
+[node name="CloseControlsBtn" type="Button" parent="ControlsModal/Margin/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "CLOSE MANUAL"
+
+[node name="LevelSelectModal" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -240.0
+offset_right = 340.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="LevelSelectModal"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="LevelSelectModal/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="LevelSelectModal/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.1, 1)
+theme_override_font_sizes/font_size = 24
+text = "SELECT OPERATIONAL THEATER"
+horizontal_alignment = 1
+
+[node name="LevelsVBox" type="VBoxContainer" parent="LevelSelectModal/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Level0Btn" type="Button" parent="LevelSelectModal/Margin/VBox/LevelsVBox"]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "[00] PROVING GROUNDS (TEST ARENA)
+• Endless wave sandbox for movement and weapon tuning"
+
+[node name="Level1Btn" type="Button" parent="LevelSelectModal/Margin/VBox/LevelsVBox"]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "[01] THE INCINERATOR (LEVEL 01)
+• 4 massive industrial sectors with molten slag and jump pads"
+
+[node name="Level2Btn" type="Button" parent="LevelSelectModal/Margin/VBox/LevelsVBox"]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "[02] BLOOD CATHEDRAL (LEVEL 02)
+• Vaulted gothic coliseum, stained-glass hazard chasm and grand altar"
+
+[node name="CloseLevelSelectBtn" type="Button" parent="LevelSelectModal/Margin/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "BACK TO MENU"
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_music")
+volume_db = -6.0
+bus = &"Music"
+
+[node name="SFXPlayer" type="AudioStreamPlayer" parent="."]
+bus = &"SFX"
